@@ -1,6 +1,7 @@
 import Client from "@walletconnect/sign-client";
 import { PairingTypes, SessionTypes } from "@walletconnect/types";
-import { ConfigCtrl as ModalConfigCtrl, ModalCtrl } from "@web3modal/core";
+import { ConfigCtrl as ModalConfigCtrl } from "@web3modal/core";
+import QRCodeModal from "@walletconnect/qrcode-modal";
 import type { W3mModal } from "@web3modal/ui";
 import "@web3modal/ui";
 
@@ -14,17 +15,14 @@ import {
   useState,
   useRef,
 } from "react";
-import { PublicKey } from "@solana/web3.js";
 
 import {
   DEFAULT_APP_METADATA,
   DEFAULT_LOGGER,
   DEFAULT_PROJECT_ID,
-  DEFAULT_RELAY_URL,
 } from "../constants";
 import { AccountBalances, apiGetAccountBalance } from "../helpers";
 import { getAppMetadata, getSdkError } from "@walletconnect/utils";
-import { getPublicKeysFromAccounts } from "../helpers/solana";
 import { getRequiredNamespaces } from "../helpers/namespaces";
 
 /**
@@ -37,14 +35,11 @@ interface IContext {
   disconnect: () => Promise<void>;
   isInitializing: boolean;
   chains: string[];
-  relayerRegion: string;
   pairings: PairingTypes.Struct[];
   accounts: string[];
-  solanaPublicKeys?: Record<string, PublicKey>;
   balances: AccountBalances;
   isFetchingBalances: boolean;
   setChains: any;
-  setRelayerRegion: any;
 }
 
 /**
@@ -78,19 +73,13 @@ export function ClientContextProvider({
 
   const [balances, setBalances] = useState<AccountBalances>({});
   const [accounts, setAccounts] = useState<string[]>([]);
-  const [solanaPublicKeys, setSolanaPublicKeys] =
-    useState<Record<string, PublicKey>>();
   const [chains, setChains] = useState<string[]>([]);
-  const [relayerRegion, setRelayerRegion] = useState<string>(
-    DEFAULT_RELAY_URL!
-  );
 
   const reset = () => {
     setSession(undefined);
     setBalances({});
     setAccounts([]);
     setChains([]);
-    setRelayerRegion(DEFAULT_RELAY_URL!);
   };
 
   const getAccountBalances = async (_accounts: string[]) => {
@@ -127,7 +116,6 @@ export function ClientContextProvider({
       setSession(_session);
       setChains(allNamespaceChains);
       setAccounts(allNamespaceAccounts);
-      setSolanaPublicKeys(getPublicKeysFromAccounts(allNamespaceAccounts));
       await getAccountBalances(allNamespaceAccounts);
     },
     []
@@ -140,7 +128,8 @@ export function ClientContextProvider({
       }
       console.log("connect, pairing topic is:", pairing?.topic);
       try {
-        const requiredNamespaces = getRequiredNamespaces(chains);
+        const activeChain = ['eip155:1']
+        const requiredNamespaces = getRequiredNamespaces(activeChain);
         console.log(
           "requiredNamespaces config for connect:",
           requiredNamespaces
@@ -154,11 +143,13 @@ export function ClientContextProvider({
         // Open QRCode modal if a URI was returned (i.e. we're not connecting an existing pairing).
         if (uri) {
           // Create a flat array of all requested chains across namespaces.
-          const standaloneChains = Object.values(requiredNamespaces)
-            .map((namespace) => namespace.chains)
-            .flat();
+          // const standaloneChains = Object.values(requiredNamespaces)
+          //   .map((namespace) => namespace.chains)
+          //   .flat();
 
-          ModalCtrl.open({ uri, standaloneChains });
+            QRCodeModal.open(uri, () => {
+              console.log("EVENT", "QR Code Modal closed");
+            });
         }
 
         const session = await approval();
@@ -171,10 +162,10 @@ export function ClientContextProvider({
         // ignore rejection
       } finally {
         // close modal in case it was open
-        ModalCtrl.close();
+        QRCodeModal.close();
       }
     },
-    [chains, client, onSessionConnected]
+    [client, onSessionConnected]
   );
 
   const disconnect = useCallback(async () => {
@@ -255,15 +246,13 @@ export function ClientContextProvider({
 
       const _client = await Client.init({
         logger: DEFAULT_LOGGER,
-        relayUrl: relayerRegion,
+        relayUrl: 'wss://relay.walletconnect.com',
         projectId: DEFAULT_PROJECT_ID,
         metadata: getAppMetadata() || DEFAULT_APP_METADATA,
       });
 
       console.log("CREATED CLIENT: ", _client);
-      console.log("relayerRegion ", relayerRegion);
       setClient(_client);
-      prevRelayerValue.current = relayerRegion;
       await _subscribeToEvents(_client);
       await _checkPersistedState(_client);
     } catch (err) {
@@ -271,13 +260,13 @@ export function ClientContextProvider({
     } finally {
       setIsInitializing(false);
     }
-  }, [_checkPersistedState, _subscribeToEvents, relayerRegion]);
+  }, [_checkPersistedState, _subscribeToEvents]);
 
   useEffect(() => {
-    if (!client || prevRelayerValue.current !== relayerRegion) {
+    if (!client) {
       createClient();
     }
-  }, [client, createClient, relayerRegion]);
+  }, [client, createClient]);
 
   const value = useMemo(
     () => ({
@@ -286,15 +275,12 @@ export function ClientContextProvider({
       balances,
       isFetchingBalances,
       accounts,
-      solanaPublicKeys,
       chains,
-      relayerRegion,
       client,
       session,
       connect,
       disconnect,
       setChains,
-      setRelayerRegion,
     }),
     [
       pairings,
@@ -302,15 +288,12 @@ export function ClientContextProvider({
       balances,
       isFetchingBalances,
       accounts,
-      solanaPublicKeys,
       chains,
-      relayerRegion,
       client,
       session,
       connect,
       disconnect,
       setChains,
-      setRelayerRegion,
     ]
   );
 

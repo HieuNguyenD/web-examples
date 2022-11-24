@@ -87,7 +87,7 @@ interface BlockchainProps {
   active?: boolean;
   chainId: string;
   address?: string;
-  onClick?: (chain: string) => void;
+  //onClick?: (chain: string) => void;
   balances?: AccountBalances;
   actions?: AccountAction[];
 }
@@ -121,7 +121,7 @@ const Blockchain: FC<PropsWithChildren<BlockchainProps>> = (
     fetching,
     chainId,
     address,
-    onClick,
+    //onClick,
     active,
     balances,
     actions,
@@ -143,7 +143,7 @@ const Blockchain: FC<PropsWithChildren<BlockchainProps>> = (
     <React.Fragment>
       <SAccount
         rgb={chain.meta.rgb}
-        onClick={() => onClick && onClick(props.chainId)}
+        //onClick={() => onClick && onClick(props.chainId)}
         className={active ? "active" : ""}
       >
         <SChain>
@@ -172,7 +172,7 @@ const Blockchain: FC<PropsWithChildren<BlockchainProps>> = (
                   </Column>
                 </SFullWidthContainer>
               ) : null}
-              {address && !!actions && actions.length ? (
+              {/* {address && !!actions && actions.length ? (
                 <SFullWidthContainer>
                   <h6>Methods</h6>
                   {actions.map((action) => (
@@ -186,7 +186,7 @@ const Blockchain: FC<PropsWithChildren<BlockchainProps>> = (
                     </SAction>
                   ))}
                 </SFullWidthContainer>
-              ) : null}
+              ) : null} */}
             </>
           )}
         </SBlockchainChildrenContainer>

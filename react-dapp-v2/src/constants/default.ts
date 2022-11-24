@@ -1,15 +1,6 @@
 export const DEFAULT_MAIN_CHAINS = [
   // mainnets
   "eip155:1",
-  "eip155:10",
-  "eip155:100",
-  "eip155:137",
-  "eip155:42161",
-  "eip155:42220",
-  "cosmos:cosmoshub-4",
-  "solana:4sGjMW1sUnHzSxGspuhpqLDx6wiyjNtZ",
-  "polkadot:91b171bb158e2d3848fa23a9f1c25182",
-  "elrond:1",
 ];
 
 export const DEFAULT_TEST_CHAINS = [
@@ -33,10 +24,10 @@ export const DEFAULT_RELAY_URL = process.env.NEXT_PUBLIC_RELAY_URL;
 export const DEFAULT_LOGGER = "debug";
 
 export const DEFAULT_APP_METADATA = {
-  name: "React App",
-  description: "React App for WalletConnect",
-  url: "https://walletconnect.com/",
-  icons: ["https://avatars.githubusercontent.com/u/37784886"],
+      name: 'HoldStation Dapp',
+      description: 'HoldStation Dapp',
+      url: 'https://holdstation.com/',
+      icons: ['https://static.holdstation.com/logo/logo.png'],
 };
 
 /**

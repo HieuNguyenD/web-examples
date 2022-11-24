@@ -4,8 +4,6 @@ import { SessionTypes } from "@walletconnect/types";
 
 import { fonts, responsive } from "../styles";
 import Button from "./Button";
-import Icon from "./Icon";
-import { DEFAULT_GITHUB_REPO_URL } from "../constants";
 
 const SHeader = styled.div`
   margin-top: -1px;
@@ -70,18 +68,6 @@ const Header = (props: HeaderProps) => {
             <p>{session.peer.metadata.name}</p>
           </SActiveSession>
           <SHeaderActions>
-            <GithubLogoContainer>
-              <a
-                href={DEFAULT_GITHUB_REPO_URL}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Icon size={24} src={"/assets/githubLogo.svg"} />
-              </a>
-            </GithubLogoContainer>
-            <Button outline color="black" onClick={ping}>
-              {"Ping"}
-            </Button>
             <Button outline color="red" onClick={disconnect}>
               {"Disconnect"}
             </Button>
